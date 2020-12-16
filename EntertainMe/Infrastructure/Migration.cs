@@ -69,19 +69,25 @@ namespace EntertainMe.Infrastructure
                 results.Message = "Path to the database file and/or a version to migrate to was not supplied.";
             }
 
+            Logging logging = new Logging();
+
             if (results.Success)
             {
+                logging.SetLoggingInfo(new FileInfo(fullPathToDB).Directory.FullName, "migration");
+                logging.DateStamp = true;
                 try
                 {
                     if (File.Exists(fullPathToDB) && init)
                     {
                         File.Delete(fullPathToDB);
+                        logging.Log("Database found and deleted because of init state");
                     }
                     if (!File.Exists(fullPathToDB))
                     {
                         Directory.CreateDirectory(new FileInfo(fullPathToDB).Directory.FullName);
                         SQLiteConnection.CreateFile(fullPathToDB);
                         init = true;
+                        logging.Log("Database created.");
                     }
                 }
                 catch (Exception ex)
@@ -105,10 +111,12 @@ namespace EntertainMe.Infrastructure
                         connection.Execute("CREATE TABLE Versions (Id INTEGER PRIMARY KEY, Section VARCHAR(10) NOT NULL, Version VARCHAR(6) NOT NULL);");
                         connection.Execute($"INSERT INTO Versions (Section, Version) VALUES ('database', '{versionToMigrateTo}');");
                         currentDBVersion = versionCompare;
+                        logging.Log("INIT:  Version table created.");
                     }
                     else
                     {
                         currentDBVersion = Convert.ToDouble(connection.Query<string>(@"SELECT Version FROM Versions WHERE Section = 'database'").FirstOrDefault());
+                        logging.Log("MIGRATE:  Version table updated.");
                     }
 
 
@@ -119,6 +127,7 @@ namespace EntertainMe.Infrastructure
                         {
                             connection.Execute("UPDATE Versions SET Version = '00.01' WHERE Section = 'database'");
                         }
+                        logging.Log($"{(!init ? "MIGRATE" : "INIT")}:  v.01 Completed.");
                     }
 
                     if ((init && versionCompare >= .02) || (!init && (.02 > versionCompare && currentDBVersion < versionCompare)))
@@ -139,6 +148,7 @@ namespace EntertainMe.Infrastructure
                         {
                             connection.Execute("UPDATE Versions SET Version = '00.02' WHERE Section = 'database'");
                         }
+                        logging.Log($"{(!init ? "MIGRATE" : "INIT")}:  v.02 Completed.");
                     }
 
                     if ((init && versionCompare >= .03) || (!init && (.03 >= versionCompare && currentDBVersion < versionCompare)))
@@ -157,6 +167,7 @@ namespace EntertainMe.Infrastructure
                         {
                             connection.Execute("UPDATE Versions SET Version = '00.03' WHERE Section = 'database'");
                         }
+                        logging.Log($"{(!init ? "MIGRATE" : "INIT")}:  v.03 Completed.");
                     }
 
                     if (results.Success)
@@ -168,6 +179,7 @@ namespace EntertainMe.Infrastructure
                             );
                         results.MigrationOccurred = postMigrationDBVersion > currentDBVersion;
                         results.Message = postMigrationDBVersion.ToString("00.00");
+                        logging.Log($"{(!init ? "MIGRATE" : "INIT")}:  Database version set.");
                     }
                     connection.Close();
 

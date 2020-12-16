@@ -29,7 +29,7 @@ namespace EntertainMeTests.Infrastructure.Repositories
             }
             if (Directory.Exists(testPath))
             {
-                Directory.Delete(testPath);
+                Directory.Delete(testPath, true);
             }
         }
 
@@ -142,5 +142,6 @@ namespace EntertainMeTests.Infrastructure.Repositories
             Assert.True(!string.IsNullOrEmpty(version) && version == Constants.DBVersion);
             Assert.True(repo.MigrationOccurred);
         }
+
     }
 }
