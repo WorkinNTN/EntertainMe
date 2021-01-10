@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text;
 
 using Dapper;
-using System.Data.SQLite;
-
+using Dapper.FluentMap;
+using Dapper.FluentMap.Dommel;
+using Dommel;
+using EntertainMe.Domain.Entities;
 using EntertainMe.Domain.ValueObjects;
+using EntertainMe.Infrastructure.Mappings;
 
 namespace EntertainMe.Infrastructure
 {
@@ -100,7 +105,15 @@ namespace EntertainMe.Infrastructure
 
             if (results.Success)
             {
-                using (SQLiteConnection connection = new SQLiteConnection($"Data Source={fullPathToDB};Version=3;"))
+                FluentMapper.Initialize(config =>
+                {
+                    config.AddMap(new ProfileMapping());
+                    config.AddMap(new BaseEntityMapping());
+                    config.AddMap(new EntertainmentTypeMapping());
+                    config.ForDommel();
+                });
+
+                using (IDbConnection connection = new SQLiteConnection($"Data Source={fullPathToDB};Version=3;"))
                 {
                     connection.Open();
 
@@ -135,8 +148,8 @@ namespace EntertainMe.Infrastructure
                         connection.Execute(@"
                             CREATE TABLE BaseEntity (
                                 Id INTEGER PRIMARY KEY,
-                                Added TEXT NOT NULL,
-                                Updated TEXT NOT NULL,
+                                WhenAdded TEXT NOT NULL,
+                                WhenUpdated TEXT NOT NULL,
                                 ProfileId INTEGER NOT NULL,
                                 FOREIGN KEY(ProfileId)
                                     REFERENCES Profile(ProfileId)
@@ -163,6 +176,8 @@ namespace EntertainMe.Infrastructure
                                         ON UPDATE NO ACTION
                             );"
                         );
+                        EntertainmentType et = new EntertainmentType { Description = "Movie"};
+                        int id = (int)connection.Insert(et);
                         if (!init)
                         {
                             connection.Execute("UPDATE Versions SET Version = '00.03' WHERE Section = 'database'");

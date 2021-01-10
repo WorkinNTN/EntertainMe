@@ -15,8 +15,8 @@ namespace EntertainMe.Infrastructure.Mappings
         {
             ToTable("BaseEntity");
             Map(be => be.Id).ToColumn("Id").IsKey().IsIdentity();
-            Map(be => be.Added).ToColumn("Added");
-            Map(be => be.Updated).ToColumn("Updated");
+            Map(be => be.WhenAdded).ToColumn("WhenAdded");
+            Map(be => be.WhenUpdated).ToColumn("WhenUpdated");
             Map(be => be.ProfileId).ToColumn("ProfilId");
             Map(be => be.Profile).Ignore();
         }

@@ -17,11 +17,11 @@ namespace EntertainMe.Domain.Entities
         /// <summary>
         /// Date entity was added
         /// </summary>
-        public DateTime Added { get; set; }
+        public DateTime WhenAdded { get; set; }
         /// <summary>
         /// Date entity was updated
         /// </summary>
-        public DateTime Updated { get; set; }
+        public DateTime WhenUpdated { get; set; }
         /// <summary>
         /// Id of profile entity is associated with
         /// </summary>
@@ -30,5 +30,16 @@ namespace EntertainMe.Domain.Entities
         /// Profile entity is associated with 
         /// </summary>
         public Profile Profile { get; set; }
+
+        public BaseEntity()
+        {
+            WhenAdded = DateTime.Now;
+            WhenUpdated = DateTime.Now;
+        }
+
+        public void Updated()
+        {
+            WhenUpdated = DateTime.Now;
+        }
     }
 }
