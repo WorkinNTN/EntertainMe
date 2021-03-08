@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 
-using Dapper;
+using LiteDB;
 using NUnit.Framework;
 
 using EntertainMe.Domain.Entities;
@@ -11,10 +11,12 @@ using EntertainMe.Infrastructure.Repositories;
 
 namespace EntertainMeTests.Infrastructure.Repositories
 {
+    [TestFixture]
     public class EntertainMeRepositoryTests
     {
-        public string testPath = Constants.EntertainMePath;
-        public string testDBName = Constants.EntertainMeDB + "_repo_test.db";
+        public string testPath = EMConstants.EntertainMePath;
+        public string testDBName = EMConstants.EntertainMeDB + "_repo_test.db";
+        public EntertainMeRepository testRepo;
 
         [SetUp]
         public void Setup()
@@ -23,6 +25,23 @@ namespace EntertainMeTests.Infrastructure.Repositories
             {
                 testPath = testPath + @"\";
             }
+            testRepo = new EntertainMeRepository();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            testRepo = null;
+        }
+
+        [Test]
+        public void CreateNonExistingDB()
+        { 
+            var repo = new EntertainMeRepository(testPath, testDBName);
+            Assert.True(File.Exists(testPath + testDBName));
+            var profile = repo.GetEMProfileByName("New User");
+            Assert.AreEqual("New User", profile.UserName);
+            repo.Dispose();
             if (File.Exists(testPath + testDBName))
             {
                 File.Delete(testPath + testDBName);
@@ -34,114 +53,123 @@ namespace EntertainMeTests.Infrastructure.Repositories
         }
 
         [Test]
-        public void LoadRepository_CreateDatabaseFile_NonExist_latest_automigrate()
+        public void DefaultProfileCreated()
         {
-            var repo = new EntertainMeRepository(testPath, testDBName, autoMigrate: true);
-            Assert.True(Directory.Exists(testPath));
-            Assert.True(File.Exists(testPath + testDBName));
-
-            var version = repo.db.Query<string>(@"SELECT Version FROM Versions WHERE Section = 'database'").FirstOrDefault();
-            Assert.True(!string.IsNullOrEmpty(version) && version == Constants.DBVersion);
+            var profile = testRepo.GetEMProfileByName("New User");
+            Assert.AreEqual("New User", profile.UserName);
         }
 
         [Test]
-        public void LoadRepository_CreateDatabaseFile_NonExist_latest_noautomigrate()
+        public void SaveNewProfile()
         {
-            var repo = new EntertainMeRepository(testPath, testDBName);
-            Assert.True(Directory.Exists(testPath));
-            Assert.True(File.Exists(testPath + testDBName));
-
-            var version = repo.db.Query<string>(@"SELECT Version FROM Versions WHERE Section = 'database'").FirstOrDefault();
-            Assert.True(!string.IsNullOrEmpty(version) && version == Constants.DBVersion);
+            _ = testRepo.SaveEMProfile(new EMProfile { UserName = "Test Guy" });
+            var profile = testRepo.GetEMProfileByName("Test Guy");
+            Assert.NotNull(profile);
+            Assert.AreEqual("Test Guy", profile.UserName);
         }
 
         [Test]
-        public void LoadRepository_CreateDatabaseFile_NonExist_v00_01()
+        public void SaveExistingProfile()
         {
-            var repo = new EntertainMeRepository(testPath, testDBName, dbVersion: "00.01");
-            Assert.True(Directory.Exists(testPath));
-            Assert.True(File.Exists(testPath + testDBName));
+            testRepo.SaveEMProfile(new EMProfile { UserName = "Test Guy" });
+            var profile = testRepo.GetEMProfileByName("Test Guy");
+            Assert.NotNull(profile);
+            Assert.AreEqual("Test Guy", profile.UserName);
 
-            var version = repo.db.Query<string>(@"SELECT Version FROM Versions WHERE Section = 'database'").FirstOrDefault();
-            Assert.True(!string.IsNullOrEmpty(version) && version == "00.01");
-
-            var table = repo.db.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'Profile';");
-            var profileExists = table.FirstOrDefault();
-            Assert.True((!string.IsNullOrEmpty(profileExists) && profileExists == "Profile"));
-
-            table = repo.db.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'BaseEntity';");
-            var baseEntityExists = table.FirstOrDefault();
-            Assert.True(string.IsNullOrEmpty(baseEntityExists));
-
-            table = repo.db.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'EntertainmentType';");
-            var entertainmentTypeExists = table.FirstOrDefault();
-            Assert.True(string.IsNullOrEmpty(entertainmentTypeExists));
+            profile.UserName = "New Guy";
+            _ = testRepo.SaveEMProfile(profile);
+            var updatedProfile = testRepo.GetEMProfileByName("New Guy");
+            Assert.AreEqual("New Guy", updatedProfile.UserName);
+            Assert.AreEqual(profile.Id, updatedProfile.Id);
+            
         }
 
         [Test]
-        public void LoadRepository_CreateDatabaseFile_NonExist_v00_02()
+        public void GetAllEntertainmentTypes()
         {
-            var repo = new EntertainMeRepository(testPath, testDBName, dbVersion: "00.02");
-            Assert.True(Directory.Exists(testPath));
-            Assert.True(File.Exists(testPath + testDBName));
+            var results = testRepo.GetEMTypes();
 
-            var version = repo.db.Query<string>(@"SELECT Version FROM Versions WHERE Section = 'database'").FirstOrDefault();
-            Assert.True(!string.IsNullOrEmpty(version) && version == "00.02");
-
-            var table = repo.db.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'Profile';");
-            var profileExists = table.FirstOrDefault();
-            Assert.True((!string.IsNullOrEmpty(profileExists) && profileExists == "Profile"));
-
-            table = repo.db.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'BaseEntity';");
-            var baseEntityExists = table.FirstOrDefault();
-            Assert.True((!string.IsNullOrEmpty(baseEntityExists) && baseEntityExists == "BaseEntity"));
-
-            table = repo.db.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'EntertainmentType';");
-            var entertainmentTypeExists = table.FirstOrDefault();
-            Assert.True(string.IsNullOrEmpty(entertainmentTypeExists));
+            Assert.GreaterOrEqual(results.Count(), 3);
+            Assert.IsTrue(results.Count(et => (et.Description.ToLower() == "movie")) == 1);
+            Assert.IsTrue(results.Count(et => (et.Description.ToLower() == "music")) == 1);
+            Assert.IsTrue(results.Count(et => (et.Description.ToLower() == "book")) == 1);
         }
 
         [Test]
-        public void LoadRepository_CreateDatabaseFile_NonExist_v00_03()
+        public void GetEntertainmentType()
         {
-            var repo = new EntertainMeRepository(testPath, testDBName, dbVersion: "00.03");
-            Assert.True(Directory.Exists(testPath));
-            Assert.True(File.Exists(testPath + testDBName));
-
-            var version = repo.db.Query<string>(@"SELECT Version FROM Versions WHERE Section = 'database'").FirstOrDefault();
-            Assert.True(!string.IsNullOrEmpty(version) && version == "00.03");
-
-            var table = repo.db.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'Profile';");
-            var profileExists = table.FirstOrDefault();
-            Assert.True((!string.IsNullOrEmpty(profileExists) && profileExists == "Profile"));
-
-            table = repo.db.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'BaseEntity';");
-            var baseEntityExists = table.FirstOrDefault();
-            Assert.True((!string.IsNullOrEmpty(baseEntityExists) && baseEntityExists == "BaseEntity"));
-
-            table = repo.db.Query<string>("SELECT name FROM sqlite_master WHERE type='table' AND name = 'EntertainmentType';");
-            var entertainmentTypeExists = table.FirstOrDefault();
-            Assert.True((!string.IsNullOrEmpty(entertainmentTypeExists) && entertainmentTypeExists == "EntertainmentType"));
+            var result = testRepo.GetEMTypeByName("Music");
+            Assert.NotNull(result);
+            Assert.AreEqual("Music", result.Description);
         }
 
         [Test]
-        public void LoadRepository_CreateDatabaseFile_NonExist_A_Version_UpgradeTo_latest()
+        public void SaveNewEntertainmentType()
         {
-            string versionToInit = "00.02";
-
-            var repo = new EntertainMeRepository(testPath, testDBName, dbVersion: versionToInit);
-            Assert.True(Directory.Exists(testPath));
-            Assert.True(File.Exists(testPath + testDBName));
-
-            var version = repo.db.Query<string>(@"SELECT Version FROM Versions WHERE Section = 'database'").FirstOrDefault();
-            Assert.True(!string.IsNullOrEmpty(version) && version == versionToInit);
-            Assert.False(repo.MigrationOccurred);
-
-            repo.MigrateDatabase();
-            version = repo.db.Query<string>(@"SELECT Version FROM Versions WHERE Section = 'database'").FirstOrDefault();
-            Assert.True(!string.IsNullOrEmpty(version) && version == Constants.DBVersion);
-            Assert.True(repo.MigrationOccurred);
+            _ = testRepo.SaveEMType(new EntertainMe.Domain.Entities.EMType { Description = "Something New" });
+            var et = testRepo.GetEMTypeByName("Something New");
+            Assert.NotNull(et);
+            Assert.AreEqual("Something New", et.Description);
         }
 
+        [Test]
+        public void SaveExistingEntertainmentType()
+        {
+            _ = testRepo.SaveEMType(new EntertainMe.Domain.Entities.EMType { Description = "Something New" });
+            var et = testRepo.GetEMTypeByName("Something New");
+            Assert.NotNull(et);
+            Assert.AreEqual("Something New", et.Description);
+
+            et.Description = "Something Changed";
+            _ = testRepo.SaveEMType(et);
+            var updatedET = testRepo.GetEMTypeByName("Something Changed");
+            Assert.AreEqual("Something Changed", updatedET.Description);
+            Assert.AreEqual(et.Id, updatedET.Id);
+
+        }
+
+        [Test]
+        public void GetAllProviders()
+        {
+            var results = testRepo.GetEMProviders();
+
+            Assert.GreaterOrEqual(results.Count(), 6);
+            Assert.IsTrue(results.Count(p => (p.Description.ToLower() == "vudu")) == 1);
+            Assert.IsTrue(results.Count(p => (p.Description.ToLower() == "amazon")) == 1);
+            Assert.IsTrue(results.Count(p => (p.Description.ToLower() == "google")) == 1);
+        }
+
+        [Test]
+        public void GetEntertainmentProvider()
+        {
+            var result = testRepo.GetEMProviderByName("Amazon");
+            Assert.NotNull(result);
+            Assert.AreEqual("Amazon", result.Description);
+        }
+
+        [Test]
+        public void SaveNewProviderType()
+        {
+            _ = testRepo.SaveEMProvider(new EMProvider { Description = "Something New" });
+            var p = testRepo.GetEMProviderByName("Something New");
+            Assert.NotNull(p);
+            Assert.AreEqual("Something New", p.Description);
+        }
+
+        [Test]
+        public void SaveExistingProvider()
+        {
+            _ = testRepo.SaveEMProvider(new EMProvider { Description = "Something New" });
+            var p = testRepo.GetEMProviderByName("Something New");
+            Assert.NotNull(p);
+            Assert.AreEqual("Something New", p.Description);
+
+            p.Description = "Something Changed";
+            _ = testRepo.SaveEMProvider(p);
+            var updatedP = testRepo.GetEMProviderByName("Something Changed");
+            Assert.AreEqual("Something Changed", updatedP.Description);
+            Assert.AreEqual(p.Id, updatedP.Id);
+
+        }
     }
 }

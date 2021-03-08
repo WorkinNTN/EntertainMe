@@ -9,7 +9,7 @@ namespace EntertainMe.Infrastructure
     /// <summary>
     /// Infrastructure related constants
     /// </summary>
-    public static class Constants
+    public static class EMConstants
     {
         /// <summary>
         /// Path for EntertainMe local storage 
@@ -20,9 +20,24 @@ namespace EntertainMe.Infrastructure
         /// Name to use for EntertainMe local storage file
         /// </summary>
         public const string EntertainMeDB = "EntertainMe.db";
+    }
+
+    /// <summary>
+    /// Collections used to house various pieces of data.
+    /// </summary>
+    public static class Collections
+    {
         /// <summary>
-        /// Latest version of database file
+        /// Profile data
         /// </summary>
-        public const string DBVersion = "00.03";
+        public const string Profiles = "Profiles";
+        /// <summary>
+        /// Entertainment type data
+        /// </summary>
+        public const string EntertainmentTypes = "EntertainmentTypes";
+        /// <summary>
+        /// Entertainment provider data
+        /// </summary>
+        public const string EntertainmentProviders = "EntertainmentProviders";
     }
 }

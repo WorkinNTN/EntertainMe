@@ -18,7 +18,7 @@ namespace EntertainMeTests.Infrastructure
         [Test]
         public void EntertainMePathHasValue()
         {
-            Assert.IsTrue(!string.IsNullOrEmpty(Constants.EntertainMePath));
+            Assert.IsTrue(!string.IsNullOrEmpty(EMConstants.EntertainMePath));
         }
     }
 }

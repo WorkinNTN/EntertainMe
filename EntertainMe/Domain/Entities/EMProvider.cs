@@ -5,12 +5,12 @@ using System.Text;
 namespace EntertainMe.Domain.Entities
 {
     /// <summary>
-    /// Different types of entertainment options
+    /// Different types of entertainment providers such as Amazon or Vudu
     /// </summary>
-    public partial class EntertainmentType : BaseEntity
+    public partial class EMProvider: EMBaseEntity
     {
         /// <summary>
-        /// Description of the entertainment type
+        /// Description of the entertainment provider
         /// </summary>
         public string Description { get; set; }
     }

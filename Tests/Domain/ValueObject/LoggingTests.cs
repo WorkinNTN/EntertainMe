@@ -27,7 +27,7 @@ namespace EntertainMeTests.Domain.ValueObject
         [Test]
         public void Create()
         {
-            var logging = new Logging();
+            var logging = new EMLogging();
 
             Assert.IsNotNull(logging);
         }
@@ -35,7 +35,7 @@ namespace EntertainMeTests.Domain.ValueObject
         [Test]
         public void CreateWithFileInfo()
         {
-            var logging = new Logging(logPath, logFile);
+            var logging = new EMLogging(logPath, logFile);
 
             Assert.IsNotNull(logging);
         }
@@ -44,7 +44,7 @@ namespace EntertainMeTests.Domain.ValueObject
         public void CreateWithFileInfoStandardFileName()
         {
             string fullLogFilename = logPath + logFile + ".log";
-            var logging = new Logging(logPath, logFile);
+            var logging = new EMLogging(logPath, logFile);
             Assert.IsNotNull(logging);
 
             logging.Log("Test");
@@ -55,7 +55,7 @@ namespace EntertainMeTests.Domain.ValueObject
         public void CreateWithAddedFileInfoStandardFileName()
         {
             string fullLogFilename = logPath + logFile + ".log";
-            var logging = new Logging();
+            var logging = new EMLogging();
             logging.SetLoggingInfo(logPath, logFile);
             Assert.IsNotNull(logging);
 
@@ -67,7 +67,7 @@ namespace EntertainMeTests.Domain.ValueObject
         public void CreateWithFileInfoDatedFileName()
         {
             string fullLogFilename = logPath + logFile + "." + logFileDate + ".log";
-            var logging = new Logging(logPath, logFile);
+            var logging = new EMLogging(logPath, logFile);
             logging.DateStamp = true;
             Assert.IsNotNull(logging);
 
@@ -79,7 +79,7 @@ namespace EntertainMeTests.Domain.ValueObject
         public void CreateWithAddedFileInfoDatedFileName()
         {
             string fullLogFilename = logPath + logFile + "." + logFileDate + ".log";
-            var logging = new Logging();
+            var logging = new EMLogging();
             logging.DateStamp = true;
             logging.SetLoggingInfo(logPath, logFile);
             Assert.IsNotNull(logging);
@@ -97,7 +97,7 @@ namespace EntertainMeTests.Domain.ValueObject
         public void CreateWithFileInfoAllLoggingTypes(LoggingType lt)
         {
             string fullLogFilename = logPath + logFile + ".log";
-            var logging = new Logging(logPath, logFile);
+            var logging = new EMLogging(logPath, logFile);
 
             Assert.IsNotNull(logging);
 

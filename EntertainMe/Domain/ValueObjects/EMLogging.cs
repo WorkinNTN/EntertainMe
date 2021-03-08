@@ -13,7 +13,7 @@ namespace EntertainMe.Domain.ValueObjects
         Fatal
     }
 
-    public class Logging
+    public class EMLogging
     {
         /// <summary>
         /// Path to store log file in
@@ -37,7 +37,7 @@ namespace EntertainMe.Domain.ValueObjects
         /// <summary>
         /// Initialize logging object
         /// </summary>
-        public Logging()
+        public EMLogging()
         { 
         }
 
@@ -46,7 +46,7 @@ namespace EntertainMe.Domain.ValueObjects
         /// </summary>
         /// <param name="logFilePath">Path log file will be written to</param>
         /// <param name="logFileName">Name to use for log file.  Do not supply an extension, .log is automatially appended</param>
-        public Logging(string logFilePath, string logFileName)
+        public EMLogging(string logFilePath, string logFileName)
         {
             SetLoggingInfo(logFilePath, logFileName);
         }

@@ -7,7 +7,7 @@ namespace EntertainMe.Domain.Entities
     /// <summary>
     /// Base class that all other classes are derived from
     /// </summary>
-    public abstract class BaseEntity
+    public abstract class EMBaseEntity
     {
         /// <summary>
         /// Unique identifier for entity
@@ -22,16 +22,8 @@ namespace EntertainMe.Domain.Entities
         /// Date entity was updated
         /// </summary>
         public DateTime WhenUpdated { get; set; }
-        /// <summary>
-        /// Id of profile entity is associated with
-        /// </summary>
-        public int ProfileId { get; set; }
-        /// <summary>
-        /// Profile entity is associated with 
-        /// </summary>
-        public Profile Profile { get; set; }
 
-        public BaseEntity()
+        public EMBaseEntity()
         {
             WhenAdded = DateTime.Now;
             WhenUpdated = DateTime.Now;
