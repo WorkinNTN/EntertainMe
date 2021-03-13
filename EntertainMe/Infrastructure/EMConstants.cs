@@ -39,5 +39,9 @@ namespace EntertainMe.Infrastructure
         /// Entertainment provider data
         /// </summary>
         public const string EntertainmentProviders = "EntertainmentProviders";
+        /// <summary>
+        /// Entertainment medium data
+        /// </summary>
+        public const string EntertainmentMediums = "EntertainmentMediums";
     }
 }

@@ -108,6 +108,32 @@ namespace EntertainMe.Infrastructure.Repositories
             {
                 Description = "Google",
             });
+
+            var entertainmentMediumCollection = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
+            _ = entertainmentMediumCollection.Insert(new EMMedium
+            {
+                Description = "CD",
+            });
+            _ = entertainmentMediumCollection.Insert(new EMMedium
+            {
+                Description = "DVD",
+            });
+            _ = entertainmentMediumCollection.Insert(new EMMedium
+            {
+                Description = "Cassette",
+            });
+            _ = entertainmentMediumCollection.Insert(new EMMedium
+            {
+                Description = "Hard Cover",
+            });
+            _ = entertainmentMediumCollection.Insert(new EMMedium
+            {
+                Description = "Soft Cover",
+            });
+            _ = entertainmentMediumCollection.Insert(new EMMedium
+            {
+                Description = "Digital",
+            });
         }
 
         public EMProfile GetEMProfileByName(string username)
@@ -201,6 +227,40 @@ namespace EntertainMe.Infrastructure.Repositories
             }
 
             return entertainmentProvider;
+        }
+
+        public IList<EMMedium> GetEMMediums()
+        {
+            var col = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
+            var result = col.Query().ToList();
+
+            return result;
+        }
+
+        public EMMedium GetEMMediumByName(string description)
+        {
+
+            var col = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
+            var result = col.Query()
+                .Where(x => x.Description.ToLower() == description.ToLower()).FirstOrDefault();
+
+            return result;
+        }
+
+        public EMMedium SaveEMMedium(EMMedium entertainmentMedium)
+        {
+            var col = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
+            if (entertainmentMedium.Id == 0)
+            {
+                entertainmentMedium.Id = col.Insert(entertainmentMedium);
+            }
+            else
+            {
+                entertainmentMedium.Updated();
+                _ = col.Update(entertainmentMedium);
+            }
+
+            return entertainmentMedium;
         }
 
         protected virtual void Dispose(bool disposing)

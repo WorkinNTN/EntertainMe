@@ -53,8 +53,26 @@ namespace EntertainMe.Domain.Abstracts
         /// <summary>
         /// Save a provider
         /// </summary>
-        /// <param name="entertainmentType"></param>
+        /// <param name="entertainmentProvider"></param>
         /// <returns></returns>
         EMProvider SaveEMProvider(EMProvider entertainmentProvider);
+
+        /// <summary>
+        /// Retrieve all mediums
+        /// </summary>
+        /// <returns></returns>
+        IList<EMMedium> GetEMMediums();
+        /// <summary>
+        /// Retrieve a medium
+        /// </summary>
+        /// <param name="description">Description used to retrieve medium by</param>
+        /// <returns></returns>
+        EMMedium GetEMMediumByName(string description);
+        /// <summary>
+        /// Save a medium
+        /// </summary>
+        /// <param name="entertainmentMedium"></param>
+        /// <returns></returns>
+        EMMedium SaveEMMedium(EMMedium entertainmentMedium);
     }
 }

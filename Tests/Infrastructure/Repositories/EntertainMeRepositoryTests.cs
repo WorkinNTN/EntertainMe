@@ -171,5 +171,53 @@ namespace EntertainMeTests.Infrastructure.Repositories
             Assert.AreEqual(p.Id, updatedP.Id);
 
         }
+
+        [Test]
+        public void GetAllEntertainmentMediums()
+        {
+            var results = testRepo.GetEMMediums();
+
+            Assert.GreaterOrEqual(results.Count(), 6);
+            Assert.IsTrue(results.Count(et => (et.Description.ToLower() == "cd")) == 1);
+            Assert.IsTrue(results.Count(et => (et.Description.ToLower() == "dvd")) == 1);
+            Assert.IsTrue(results.Count(et => (et.Description.ToLower() == "cassette")) == 1);
+            Assert.IsTrue(results.Count(et => (et.Description.ToLower() == "hard cover")) == 1);
+            Assert.IsTrue(results.Count(et => (et.Description.ToLower() == "soft cover")) == 1);
+            Assert.IsTrue(results.Count(et => (et.Description.ToLower() == "digital")) == 1);
+        }
+
+        [Test]
+        public void GetEntertainmentMedium()
+        {
+            var result = testRepo.GetEMMediumByName("DVD");
+            Assert.NotNull(result);
+            Assert.AreEqual("DVD", result.Description);
+        }
+
+        [Test]
+        public void SaveNewEntertainmentMedium()
+        {
+            _ = testRepo.SaveEMMedium(new EMMedium { Description = "Something New" });
+            var em = testRepo.GetEMMediumByName("Something New");
+            Assert.NotNull(em);
+            Assert.AreEqual("Something New", em.Description);
+        }
+
+        [Test]
+        public void SaveExistingEntertainmentMedium()
+        {
+            _ = testRepo.SaveEMMedium(new EMMedium { Description = "Something New" });
+            var em = testRepo.GetEMMediumByName("Something New");
+            Assert.NotNull(em);
+            Assert.AreEqual("Something New", em.Description);
+
+            em.Description = "Something Changed";
+            _ = testRepo.SaveEMMedium(em);
+            var updatedEM = testRepo.GetEMMediumByName("Something Changed");
+            Assert.AreEqual("Something Changed", updatedEM.Description);
+            Assert.AreEqual(em.Id, updatedEM.Id);
+
+        }
+
     }
 }
