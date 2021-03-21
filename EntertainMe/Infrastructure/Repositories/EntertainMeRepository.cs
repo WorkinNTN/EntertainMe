@@ -17,6 +17,7 @@ namespace EntertainMe.Infrastructure.Repositories
     public partial class EntertainMeRepository : IEntertainMeRepository, IDisposable
     {
         private bool disposedValue;
+        private BsonMapper mapper = new BsonMapper();
 
         /// <summary>
         /// String containing path to database
@@ -27,10 +28,18 @@ namespace EntertainMe.Infrastructure.Repositories
         /// </summary>
         private LiteDatabase EMDatabase { get; set; }
 
+        #region Database collections
+        private ILiteCollection<EMProfile> profileCollection;
+        private ILiteCollection<EMType> entertainmentTypeCollection;
+        private ILiteCollection<EMProvider> entertainmentProviderCollection;
+        private ILiteCollection<EMMedium> entertainmentMediumCollection;
+        private ILiteCollection<EMValidTypeMedium> entertainmentValidTypeMediumCollection;
+        #endregion
+
         public EntertainMeRepository()
         {
             EMDatabase = new LiteDatabase(new MemoryStream());
-            InitDatabase();
+            ConfigureDatabase(true);
         }
 
         /// <summary>
@@ -52,110 +61,137 @@ namespace EntertainMe.Infrastructure.Repositories
                 Directory.CreateDirectory(path);
             }
 
-            bool dbWasInitialized = !File.Exists(PathToDb);
+            bool needToInitData = !File.Exists(PathToDb);
             EMDatabase = new LiteDatabase(PathToDb);
 
-            if (dbWasInitialized)
-            {
-                InitDatabase();
-            }
+            ConfigureDatabase(needToInitData);
+
         }
 
-        private void InitDatabase()
+        /// <summary>
+        /// Configure database
+        /// </summary>
+        /// <param name="needToInitData">If set to true default data is added</param>
+        private void ConfigureDatabase(bool needToInitData)
         {
-            var profileCollection = EMDatabase.GetCollection<EMProfile>(Collections.Profiles);
-            _ = profileCollection.Insert(new EMProfile
-            {
-                UserName = "New User"
-            });
+            #region Initialize/Configure collections
+            profileCollection = EMDatabase.GetCollection<EMProfile>(Collections.Profiles);
+            entertainmentTypeCollection = EMDatabase.GetCollection<EMType>(Collections.EntertainmentTypes);
+            entertainmentProviderCollection = EMDatabase.GetCollection<EMProvider>(Collections.EntertainmentProviders);
+            entertainmentMediumCollection = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
+            entertainmentValidTypeMediumCollection = EMDatabase.GetCollection<EMValidTypeMedium>(Collections.EntertainmentValidTypesMediums);
+            mapper.Entity<EMValidTypeMedium>()
+                .DbRef(x => x.EMType, Collections.EntertainmentTypes)
+                .DbRef(x => x.EMMedium, Collections.EntertainmentMediums);
+            #endregion
 
-            var entertainmentTypeCollection = EMDatabase.GetCollection<EMType>(Collections.EntertainmentTypes);
-            _ = entertainmentTypeCollection.Insert(new EMType
+            #region Initialize default data sets
+            if (needToInitData)
             {
-                Description = "Movie",
-            });
-            _ = entertainmentTypeCollection.Insert(new EMType
-            {
-                Description = "Music",
-            });
-            _ = entertainmentTypeCollection.Insert(new EMType
-            {
-                Description = "Book",
-            });
+                #region Default profile
+                _ = profileCollection.Insert(new EMProfile
+                {
+                    UserName = "New User"
+                });
+                #endregion
 
-            var entertainmentProviderCollection = EMDatabase.GetCollection<EMProvider>(Collections.EntertainmentProviders);
-            _ = entertainmentProviderCollection.Insert(new EMProvider
-            {
-                Description = "None",
-            });
-            _ = entertainmentProviderCollection.Insert(new EMProvider
-            {
-                Description = "Vudu",
-            });
-            _ = entertainmentProviderCollection.Insert(new EMProvider
-            {
-                Description = "Movies Anywhere",
-            });
-            _ = entertainmentProviderCollection.Insert(new EMProvider
-            {
-                Description = "Microsoft",
-            });
-            _ = entertainmentProviderCollection.Insert(new EMProvider
-            {
-                Description = "Amazon",
-            });
-            _ = entertainmentProviderCollection.Insert(new EMProvider
-            {
-                Description = "Google",
-            });
+                #region Default types
+                var typeValues = new string[] { "Movie", "Music", "Book" };
+                foreach (var value in typeValues)
+                {
+                    _ = entertainmentTypeCollection.Insert(new EMType
+                    {
+                        Description = value,
+                    });
+                }
+                #endregion
 
-            var entertainmentMediumCollection = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
-            _ = entertainmentMediumCollection.Insert(new EMMedium
-            {
-                Description = "CD",
-            });
-            _ = entertainmentMediumCollection.Insert(new EMMedium
-            {
-                Description = "DVD",
-            });
-            _ = entertainmentMediumCollection.Insert(new EMMedium
-            {
-                Description = "Cassette",
-            });
-            _ = entertainmentMediumCollection.Insert(new EMMedium
-            {
-                Description = "Hard Cover",
-            });
-            _ = entertainmentMediumCollection.Insert(new EMMedium
-            {
-                Description = "Soft Cover",
-            });
-            _ = entertainmentMediumCollection.Insert(new EMMedium
-            {
-                Description = "Digital",
-            });
+                #region Default providers
+                var providerValues = new string[] { "None", "Vudu", "Movies Anywhere", "Microsoft", "Amazon", "Google" };
+                foreach (var value in providerValues)
+                {
+                    _ = entertainmentProviderCollection.Insert(new EMProvider
+                    {
+                        Description = value,
+                    });
+                }
+                #endregion
+
+                #region Default mediums
+                var mediumValues = new string[] { "CD", "DVD", "Cassette", "Hard Cover", "Soft Cover", "Digital", "Video Cassette" };
+                foreach (var value in mediumValues)
+                {
+                    _ = entertainmentMediumCollection.Insert(new EMMedium
+                    {
+                        Description = value,
+                        PickProvider = (value == "Digital") ? true : false
+                    });
+                }
+                #endregion
+
+                #region Default valid medium/type combinations
+                foreach (var medium in entertainmentMediumCollection.FindAll())
+                {
+                    var typeList = "skip";
+                    switch (medium.Description.ToLower())
+                    {
+                        case "cd":
+                        case "cassette":
+                            typeList = "music;book";
+                            break;
+                        case "hard cover":
+                        case "soft cover":
+                            typeList = "book";
+                            break;
+                        case "dvd":
+                        case "video cassette":
+                            typeList = "movie";
+                            break;
+                        case "digital":
+                            typeList = "movie;music;book";
+                            break;
+                        default:
+                            typeList = "skip";
+                            break;
+                    }
+
+                    if (typeList == "skip")
+                    {
+                        continue;
+                    }
+                    foreach (var et in entertainmentTypeCollection.Find(et => typeList.Contains(et.Description.ToLower())))
+                    {
+                        _ = entertainmentValidTypeMediumCollection.Insert(new EMValidTypeMedium
+                        {
+                            EMMedium = medium,
+                            EMType = et,
+                        });
+                    }
+                }
+                #endregion
+
+            }
+            #endregion
+
         }
 
         public EMProfile GetEMProfileByName(string username)
         {
-            var col = EMDatabase.GetCollection<EMProfile>(Collections.Profiles);
-            var result = col.Query()
-                .Where(x => x.UserName.ToLower() == username.ToLower()).FirstOrDefault();
+            var result = profileCollection.FindOne(x => x.UserName.ToLower() == username.ToLower());
 
             return result;
         }
 
         public EMProfile SaveEMProfile(EMProfile profile)
         {
-            var col = EMDatabase.GetCollection<EMProfile>(Collections.Profiles);
             if (profile.Id == 0)
             {
-                profile.Id = col.Insert(profile);
+                profile.Id = profileCollection.Insert(profile);
             }
             else
             {
                 profile.Updated();
-                _ = col.Update(profile);
+                _ = profileCollection.Update(profile);
             }
 
             return profile;
@@ -163,8 +199,7 @@ namespace EntertainMe.Infrastructure.Repositories
 
         public IList<EMType> GetEMTypes()
         {
-            var col = EMDatabase.GetCollection<EMType>(Collections.EntertainmentTypes);
-            var result = col.Query().ToList();
+            var result = entertainmentTypeCollection.Query().ToList();
 
             return result;
         }
@@ -172,24 +207,21 @@ namespace EntertainMe.Infrastructure.Repositories
         public EMType GetEMTypeByName(string description)
         {
 
-            var col = EMDatabase.GetCollection<EMType>(Collections.EntertainmentTypes);
-            var result = col.Query()
-                .Where(x => x.Description.ToLower() == description.ToLower()).FirstOrDefault();
+            var result = entertainmentTypeCollection.FindOne(x => x.Description.ToLower() == description.ToLower());
 
             return result;
         }
 
         public EMType SaveEMType(EMType entertainmentType)
         {
-            var col = EMDatabase.GetCollection<EMType>(Collections.EntertainmentTypes);
             if (entertainmentType.Id == 0)
             {
-                entertainmentType.Id = col.Insert(entertainmentType);
+                entertainmentType.Id = entertainmentTypeCollection.Insert(entertainmentType);
             }
             else
             {
                 entertainmentType.Updated();
-                _ = col.Update(entertainmentType);
+                _ = entertainmentTypeCollection.Update(entertainmentType);
             }
 
             return entertainmentType;
@@ -197,8 +229,7 @@ namespace EntertainMe.Infrastructure.Repositories
 
         public IList<EMProvider> GetEMProviders()
         {
-            var col = EMDatabase.GetCollection<EMProvider>(Collections.EntertainmentProviders);
-            var result = col.Query().ToList();
+            var result = entertainmentProviderCollection.Query().ToList();
 
             return result;
         }
@@ -206,24 +237,21 @@ namespace EntertainMe.Infrastructure.Repositories
         public EMProvider GetEMProviderByName(string description)
         {
 
-            var col = EMDatabase.GetCollection<EMProvider>(Collections.EntertainmentProviders);
-            var result = col.Query()
-                .Where(x => x.Description.ToLower() == description.ToLower()).FirstOrDefault();
+            var result = entertainmentProviderCollection.FindOne(x => x.Description.ToLower() == description.ToLower());
 
             return result;
         }
 
         public EMProvider SaveEMProvider(EMProvider entertainmentProvider)
         {
-            var col = EMDatabase.GetCollection<EMProvider>(Collections.EntertainmentProviders);
             if (entertainmentProvider.Id == 0)
             {
-                entertainmentProvider.Id = col.Insert(entertainmentProvider);
+                entertainmentProvider.Id = entertainmentProviderCollection.Insert(entertainmentProvider);
             }
             else
             {
                 entertainmentProvider.Updated();
-                _ = col.Update(entertainmentProvider);
+                _ = entertainmentProviderCollection.Update(entertainmentProvider);
             }
 
             return entertainmentProvider;
@@ -231,8 +259,7 @@ namespace EntertainMe.Infrastructure.Repositories
 
         public IList<EMMedium> GetEMMediums()
         {
-            var col = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
-            var result = col.Query().ToList();
+            var result = entertainmentMediumCollection.Query().ToList();
 
             return result;
         }
@@ -240,29 +267,82 @@ namespace EntertainMe.Infrastructure.Repositories
         public EMMedium GetEMMediumByName(string description)
         {
 
-            var col = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
-            var result = col.Query()
-                .Where(x => x.Description.ToLower() == description.ToLower()).FirstOrDefault();
+            var result = entertainmentMediumCollection.FindOne(x => x.Description.ToLower() == description.ToLower());
 
             return result;
         }
 
         public EMMedium SaveEMMedium(EMMedium entertainmentMedium)
         {
-            var col = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
             if (entertainmentMedium.Id == 0)
             {
-                entertainmentMedium.Id = col.Insert(entertainmentMedium);
+                entertainmentMedium.Id = entertainmentMediumCollection.Insert(entertainmentMedium);
             }
             else
             {
                 entertainmentMedium.Updated();
-                _ = col.Update(entertainmentMedium);
+                _ = entertainmentMediumCollection.Update(entertainmentMedium);
             }
 
             return entertainmentMedium;
         }
 
+        public List<EMValidTypeMedium> GetValidMediumsForType(string typeName)
+        {
+            var type = entertainmentTypeCollection.FindOne(t => t.Description.ToLower() == typeName.ToLower());
+            if (type != null)
+            {
+                var mediums = GetValidMediumsForType(type.Id);
+                return mediums;
+            }
+            return new List<EMValidTypeMedium>();
+        }
+
+        public List<EMValidTypeMedium> GetValidMediumsForType(int typeId)
+        {
+            var mediums = entertainmentValidTypeMediumCollection
+                .Include(valid => valid.EMType)
+                .Include(valid => valid.EMMedium)
+                .Find(valid => valid.EMType.Id == typeId);
+
+            return mediums.ToList();
+        }
+        
+        public List<EMValidTypeMedium> GetValidMediumsForType(EMType emType)
+        {
+            var mediums = GetValidMediumsForType(emType.Id);
+            return mediums;
+        }
+
+
+        public List<EMValidTypeMedium> GetValidTypesForMedium(string mediumName)
+        {
+            var medium = entertainmentMediumCollection.FindOne(t => t.Description.ToLower() == mediumName.ToLower());
+            if (medium != null)
+            {
+                var types = GetValidTypesForMedium(medium.Id);
+                return types;
+            }
+            return new List<EMValidTypeMedium>();
+        }
+
+        public List<EMValidTypeMedium> GetValidTypesForMedium(int mediumId)
+        {
+            var mediums = entertainmentValidTypeMediumCollection
+                .Include(valid => valid.EMType)
+                .Include(valid => valid.EMMedium)
+                .Find(valid => valid.EMMedium.Id == mediumId);
+
+            return mediums.ToList();
+        }
+
+        public List<EMValidTypeMedium> GetValidTypesForMedium(EMMedium emMedium)
+        {
+            var mediums = GetValidTypesForMedium(emMedium.Id);
+            return mediums;
+        }
+
+        #region Dispose
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -292,5 +372,6 @@ namespace EntertainMe.Infrastructure.Repositories
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }

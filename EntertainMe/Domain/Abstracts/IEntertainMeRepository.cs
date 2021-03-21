@@ -74,5 +74,43 @@ namespace EntertainMe.Domain.Abstracts
         /// <param name="entertainmentMedium"></param>
         /// <returns></returns>
         EMMedium SaveEMMedium(EMMedium entertainmentMedium);
+
+        /// <summary>
+        /// Get valid mediums associated with a type
+        /// </summary>
+        /// <param name="typeName">Name of the type</param>
+        /// <returns></returns>
+        List<EMValidTypeMedium> GetValidMediumsForType(string typeName);
+        /// <summary>
+        /// Get valid mediums associated with a type
+        /// </summary>
+        /// <param name="typeId">Id of the type</param>
+        /// <returns></returns>
+        List<EMValidTypeMedium> GetValidMediumsForType(int typeId);
+        /// <summary>
+        /// Get valid mediums associated with a type
+        /// </summary>
+        /// <param name="emType">Type object</param>
+        /// <returns></returns>
+        List<EMValidTypeMedium> GetValidMediumsForType(EMType emType);
+
+        /// <summary>
+        /// Get valid types associated with a medium
+        /// </summary>
+        /// <param name="mediumName">Name of the medium</param>
+        /// <returns></returns>
+        List<EMValidTypeMedium> GetValidTypesForMedium(string mediumName);
+        /// <summary>
+        /// Get valid types associated with a medium
+        /// </summary>
+        /// <param name="mediumId">Id of the medium</param>
+        /// <returns></returns>
+        List<EMValidTypeMedium> GetValidTypesForMedium(int mediumId);
+        /// <summary>
+        /// Get valid types associated with a medium
+        /// </summary>
+        /// <param name="emMedium">Medium object</param>
+        /// <returns></returns>
+        List<EMValidTypeMedium> GetValidTypesForMedium(EMMedium emMedium);
     }
 }

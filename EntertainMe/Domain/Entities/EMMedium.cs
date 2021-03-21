@@ -13,5 +13,14 @@ namespace EntertainMe.Domain.Entities
         /// Description of the entertainment type
         /// </summary>
         public string Description { get; set; }
+        /// <summary>
+        /// Can a provider other than None
+        /// </summary>
+        public bool PickProvider { get; set; }
+
+        public EMMedium()
+        {
+            PickProvider = false;
+        }
     }
 }

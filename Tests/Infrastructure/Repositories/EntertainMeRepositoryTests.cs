@@ -53,7 +53,7 @@ namespace EntertainMeTests.Infrastructure.Repositories
         }
 
         [Test]
-        public void DefaultProfileCreated()
+        public void DefaultDBInitialized()
         {
             var profile = testRepo.GetEMProfileByName("New User");
             Assert.AreEqual("New User", profile.UserName);
@@ -219,5 +219,79 @@ namespace EntertainMeTests.Infrastructure.Repositories
 
         }
 
+        [Test]
+        public void GetValidMediumsForBooksByDescription()
+        {
+            var mediums = testRepo.GetValidMediumsForType("Book");
+
+            Assert.IsNotNull(mediums);
+            Assert.AreEqual(5, mediums.Count());
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "cd") == 1);
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "cassette") == 1);
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "hard cover") == 1);
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "soft cover") == 1);
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "digital") == 1);
+        }
+
+        [Test]
+        public void GetValidMediumsForMusicsById()
+        {
+            var type = testRepo.GetEMTypeByName("music");
+            var mediums = testRepo.GetValidMediumsForType(type.Id);
+
+            Assert.IsNotNull(mediums);
+            Assert.AreEqual(3, mediums.Count());
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "cd") == 1);
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "cassette") == 1);
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "digital") == 1);
+        }
+
+        [Test]
+        public void GetValidMediumsForMoviesByObject()
+        {
+            var type = testRepo.GetEMTypeByName("movie");
+            var mediums = testRepo.GetValidMediumsForType(type);
+
+            Assert.IsNotNull(mediums);
+            Assert.AreEqual(3, mediums.Count());
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "dvd") == 1);
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "video cassette") == 1);
+            Assert.IsTrue(mediums.Count(mediums => mediums.EMMedium.Description.ToLower() == "digital") == 1);
+        }
+
+        [Test]
+        public void GetValidTypesForCDsByDescription()
+        {
+            var types = testRepo.GetValidTypesForMedium("cd");
+
+            Assert.IsNotNull(types);
+            Assert.AreEqual(2, types.Count());
+            Assert.IsTrue(types.Count(types => types.EMType.Description.ToLower() == "music") == 1);
+            Assert.IsTrue(types.Count(types => types.EMType.Description.ToLower() == "book") == 1);
+        }
+
+        [Test]
+        public void GetValidTypesForDigitalById()
+        {
+            var medium = testRepo.GetEMMediumByName("digital");
+            var types = testRepo.GetValidTypesForMedium(medium.Id);
+
+            Assert.IsNotNull(types);
+            Assert.AreEqual(3, types.Count());
+            Assert.IsTrue(types.Count(types => types.EMType.Description.ToLower() == "music") == 1);
+            Assert.IsTrue(types.Count(types => types.EMType.Description.ToLower() == "book") == 1);
+            Assert.IsTrue(types.Count(types => types.EMType.Description.ToLower() == "movie") == 1);
+        }
+
+        [Test]
+        public void GetValidTypesForDVDByObject()
+        {
+            var medium = testRepo.GetEMMediumByName("dvd");
+            var types = testRepo.GetValidTypesForMedium(medium);
+
+            Assert.IsNotNull(types);
+            Assert.AreEqual(1, types.Count());
+            Assert.IsTrue(types.Count(types => types.EMType.Description.ToLower() == "movie") == 1);
+        }
     }
 }

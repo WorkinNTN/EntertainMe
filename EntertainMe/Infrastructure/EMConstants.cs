@@ -43,5 +43,9 @@ namespace EntertainMe.Infrastructure
         /// Entertainment medium data
         /// </summary>
         public const string EntertainmentMediums = "EntertainmentMediums";
+        /// <summary>
+        /// Enterainment types/mediums combination that are valid data
+        /// </summary>
+        public const string EntertainmentValidTypesMediums = "EntertainmentValidTypesMediums";
     }
 }
