@@ -4,9 +4,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Rodney Dixon</Authors>
     <Company>REDWare</Company>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Description>Tracks a user's entertainment items</Description>
-    <Copyright>Copyright (c) 2020</Copyright>
+    <Copyright>Copyright (c) 2021</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

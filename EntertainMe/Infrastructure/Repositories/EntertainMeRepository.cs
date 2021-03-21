@@ -29,11 +29,12 @@ namespace EntertainMe.Infrastructure.Repositories
         private LiteDatabase EMDatabase { get; set; }
 
         #region Database collections
-        private ILiteCollection<EMProfile> profileCollection;
+        private ILiteCollection<EMProfile> entertainmentProfileCollection;
         private ILiteCollection<EMType> entertainmentTypeCollection;
         private ILiteCollection<EMProvider> entertainmentProviderCollection;
         private ILiteCollection<EMMedium> entertainmentMediumCollection;
         private ILiteCollection<EMValidTypeMedium> entertainmentValidTypeMediumCollection;
+        private ILiteCollection<EMAsset> entertainmentAssetCollection;
         #endregion
 
         public EntertainMeRepository()
@@ -75,7 +76,7 @@ namespace EntertainMe.Infrastructure.Repositories
         private void ConfigureDatabase(bool needToInitData)
         {
             #region Initialize/Configure collections
-            profileCollection = EMDatabase.GetCollection<EMProfile>(Collections.Profiles);
+            entertainmentProfileCollection = EMDatabase.GetCollection<EMProfile>(Collections.EntertainmentProfiles);
             entertainmentTypeCollection = EMDatabase.GetCollection<EMType>(Collections.EntertainmentTypes);
             entertainmentProviderCollection = EMDatabase.GetCollection<EMProvider>(Collections.EntertainmentProviders);
             entertainmentMediumCollection = EMDatabase.GetCollection<EMMedium>(Collections.EntertainmentMediums);
@@ -83,13 +84,16 @@ namespace EntertainMe.Infrastructure.Repositories
             mapper.Entity<EMValidTypeMedium>()
                 .DbRef(x => x.EMType, Collections.EntertainmentTypes)
                 .DbRef(x => x.EMMedium, Collections.EntertainmentMediums);
+            entertainmentAssetCollection = EMDatabase.GetCollection<EMAsset>(Collections.EntertainmentAssets);
+            mapper.Entity<EMAsset>()
+                .DbRef(x => x.EMProfile, Collections.EntertainmentProfiles);
             #endregion
 
             #region Initialize default data sets
             if (needToInitData)
             {
                 #region Default profile
-                _ = profileCollection.Insert(new EMProfile
+                _ = entertainmentProfileCollection.Insert(new EMProfile
                 {
                     UserName = "New User"
                 });
@@ -107,7 +111,7 @@ namespace EntertainMe.Infrastructure.Repositories
                 #endregion
 
                 #region Default providers
-                var providerValues = new string[] { "None", "Vudu", "Movies Anywhere", "Microsoft", "Amazon", "Google" };
+                var providerValues = new string[] { "Self", "Vudu", "Movies Anywhere", "Microsoft", "Amazon", "Google" };
                 foreach (var value in providerValues)
                 {
                     _ = entertainmentProviderCollection.Insert(new EMProvider
@@ -177,7 +181,7 @@ namespace EntertainMe.Infrastructure.Repositories
 
         public EMProfile GetEMProfileByName(string username)
         {
-            var result = profileCollection.FindOne(x => x.UserName.ToLower() == username.ToLower());
+            var result = entertainmentProfileCollection.FindOne(x => x.UserName.ToLower() == username.ToLower());
 
             return result;
         }
@@ -186,12 +190,12 @@ namespace EntertainMe.Infrastructure.Repositories
         {
             if (profile.Id == 0)
             {
-                profile.Id = profileCollection.Insert(profile);
+                profile.Id = entertainmentProfileCollection.Insert(profile);
             }
             else
             {
                 profile.Updated();
-                _ = profileCollection.Update(profile);
+                _ = entertainmentProfileCollection.Update(profile);
             }
 
             return profile;
@@ -341,6 +345,32 @@ namespace EntertainMe.Infrastructure.Repositories
             var mediums = GetValidTypesForMedium(emMedium.Id);
             return mediums;
         }
+
+        public EMAsset SaveEMAsset(EMAsset emAssett)
+        {
+            if (emAssett.Id == 0)
+            {
+                emAssett.Id = entertainmentAssetCollection.Insert(emAssett);
+            }
+            else
+            {
+                emAssett.Updated();
+                _ = entertainmentAssetCollection.Update(emAssett);
+            }
+
+            return emAssett;
+        }
+
+        public List<EMAsset> GetEMAssets(EMProfile emProfile)
+        {
+            var assets = entertainmentAssetCollection
+                .Include(profile => profile.EMProfile)
+                .Find(x => x.EMProfile.Id == emProfile.Id)
+                .ToList();
+
+            return assets;
+        }
+
 
         #region Dispose
         protected virtual void Dispose(bool disposing)

@@ -30,7 +30,7 @@ namespace EntertainMe.Infrastructure
         /// <summary>
         /// Profile data
         /// </summary>
-        public const string Profiles = "Profiles";
+        public const string EntertainmentProfiles = "EntertainmentProfiles";
         /// <summary>
         /// Entertainment type data
         /// </summary>
@@ -47,5 +47,9 @@ namespace EntertainMe.Infrastructure
         /// Enterainment types/mediums combination that are valid data
         /// </summary>
         public const string EntertainmentValidTypesMediums = "EntertainmentValidTypesMediums";
+        /// <summary>
+        /// Entertaiment assets
+        /// </summary>
+        public const string EntertainmentAssets = "EntertainmentAssets";
     }
 }

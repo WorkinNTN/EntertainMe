@@ -293,5 +293,22 @@ namespace EntertainMeTests.Infrastructure.Repositories
             Assert.AreEqual(1, types.Count());
             Assert.IsTrue(types.Count(types => types.EMType.Description.ToLower() == "movie") == 1);
         }
+
+        [Test]
+        public void SaveAsset()
+        {
+            var profile = testRepo.GetEMProfileByName("New User");
+            var asset1 = new EMAsset() { EMProfile = profile, Title = "New Asset 1", Description = "This is a unit test asset" };
+            var asset2 = new EMAsset() { EMProfile = profile, Title = "New Asset 2", Description = "This is a unit test asset" };
+            asset1 = testRepo.SaveEMAsset(asset1);
+            asset2 = testRepo.SaveEMAsset(asset2);
+
+            var assets = testRepo.GetEMAssets(profile);
+
+            Assert.IsNotNull(assets);
+            Assert.AreEqual(2, assets.Count());
+            Assert.AreEqual("New Asset 1", assets.Find((x => x.Id == asset1.Id)).Title);
+            Assert.AreEqual("New Asset 2", assets.Find((x => x.Id == asset2.Id)).Title);
+        }
     }
 }

@@ -112,5 +112,17 @@ namespace EntertainMe.Domain.Abstracts
         /// <param name="emMedium">Medium object</param>
         /// <returns></returns>
         List<EMValidTypeMedium> GetValidTypesForMedium(EMMedium emMedium);
+        /// <summary>
+        /// Save an asset
+        /// </summary>
+        /// <param name="assett">Asset to save</param>
+        /// <returns></returns>
+        EMAsset SaveEMAsset(EMAsset emAssett);
+        /// <summary>
+        /// List all assets associated with a profile
+        /// </summary>
+        /// <param name="emProfile">Profile to list assets for</param>
+        /// <returns></returns>
+        List<EMAsset> GetEMAssets(EMProfile emProfile);
     }
 }
