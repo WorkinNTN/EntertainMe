@@ -51,5 +51,9 @@ namespace EntertainMe.Infrastructure
         /// Entertaiment assets
         /// </summary>
         public const string EntertainmentAssets = "EntertainmentAssets";
+        /// <summary>
+        /// Entertaiment assets extended data
+        /// </summary>
+        public const string EntertainmentAssetsData = "EntertainmentAssetsData";
     }
 }

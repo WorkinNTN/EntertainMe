@@ -310,5 +310,83 @@ namespace EntertainMeTests.Infrastructure.Repositories
             Assert.AreEqual("New Asset 1", assets.Find((x => x.Id == asset1.Id)).Title);
             Assert.AreEqual("New Asset 2", assets.Find((x => x.Id == asset2.Id)).Title);
         }
+
+        [Test]
+        public void SaveAssetData()
+        {
+            var profile = testRepo.GetEMProfileByName("New User");
+            var asset3 = new EMAsset() { EMProfile = profile, Title = "New Asset 3", Description = "This is a unit test asset" };
+            asset3 = testRepo.SaveEMAsset(asset3);
+
+            var assetData = new EMAssetData()
+            {
+                EMAsset = asset3,
+                EMMedium = testRepo.GetEMMediumByName("Soft Cover"),
+                EMType = testRepo.GetEMTypeByName("Book"),
+                EMProvider = testRepo.GetEMProviderByName("Self"),
+                Year = 1999
+            };
+
+            var data = testRepo.SaveEMAssetData(assetData);
+            Assert.IsNotNull(data);
+            Assert.AreEqual(assetData.EMAsset, data.EMAsset);
+            Assert.AreEqual(assetData.EMMedium, data.EMMedium);
+            Assert.AreEqual(assetData.EMProvider, data.EMProvider);
+            Assert.AreEqual(assetData.EMType, data.EMType);
+        }
+
+        [Test]
+        public void GetAssetData()
+        {
+            var profile = testRepo.GetEMProfileByName("New User");
+            var asset4 = new EMAsset() { EMProfile = profile, Title = "New Asset 4", Description = "This is a unit test asset" };
+            asset4 = testRepo.SaveEMAsset(asset4);
+
+            var assetData1 = new EMAssetData()
+            {
+                EMAsset = asset4,
+                EMMedium = testRepo.GetEMMediumByName("Soft Cover"),
+                EMType = testRepo.GetEMTypeByName("Book"),
+                EMProvider = testRepo.GetEMProviderByName("Self"),
+                Year = 1999
+            };
+            var assetData2 = new EMAssetData()
+            {
+                EMAsset = asset4,
+                EMMedium = testRepo.GetEMMediumByName("DVD"),
+                EMType = testRepo.GetEMTypeByName("Movie"),
+                EMProvider = testRepo.GetEMProviderByName("Self"),
+                Year = 1999
+            };
+            var assetData3 = new EMAssetData()
+            {
+                EMAsset = asset4,
+                EMMedium = testRepo.GetEMMediumByName("Digital"),
+                EMType = testRepo.GetEMTypeByName("Movie"),
+                EMProvider = testRepo.GetEMProviderByName("Vudu"),
+                Year = 1999
+            };
+            assetData1 = testRepo.SaveEMAssetData(assetData1);
+            assetData2 = testRepo.SaveEMAssetData(assetData2);
+            assetData3 = testRepo.SaveEMAssetData(assetData3);
+
+            var data = testRepo.GetEMAssetData(asset4);
+
+            Assert.AreEqual(3, data.Count());
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData1.Id).EMAsset.Title, assetData1.EMAsset.Title);
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData1.Id).EMMedium.Description, assetData1.EMMedium.Description);
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData1.Id).EMProvider.Description, assetData1.EMProvider.Description);
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData1.Id).EMType.Description, assetData1.EMType.Description);
+
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData2.Id).EMAsset.Title, assetData2.EMAsset.Title);
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData2.Id).EMMedium.Description, assetData2.EMMedium.Description);
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData2.Id).EMProvider.Description, assetData2.EMProvider.Description);
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData2.Id).EMType.Description, assetData2.EMType.Description);
+
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData3.Id).EMAsset.Title, assetData3.EMAsset.Title);
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData3.Id).EMMedium.Description, assetData3.EMMedium.Description);
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData3.Id).EMProvider.Description, assetData3.EMProvider.Description);
+            Assert.AreEqual(data.Find(ad => ad.Id == assetData3.Id).EMType.Description, assetData3.EMType.Description);
+        }
     }
 }

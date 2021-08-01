@@ -124,5 +124,17 @@ namespace EntertainMe.Domain.Abstracts
         /// <param name="emProfile">Profile to list assets for</param>
         /// <returns></returns>
         List<EMAsset> GetEMAssets(EMProfile emProfile);
+        /// <summary>
+        /// Save an asset
+        /// </summary>
+        /// <param name="assett">Asset to save</param>
+        /// <returns></returns>
+        EMAssetData SaveEMAssetData(EMAssetData emAssettData);
+        /// <summary>
+        /// Retrive list of data associated with an asset
+        /// </summary>
+        /// <param name="emAsset">Asset to return data for</param>
+        /// <returns></returns>
+        List<EMAssetData> GetEMAssetData(EMAsset emAsset);
     }
 }

@@ -29,12 +29,34 @@ namespace EntertainMe.Infrastructure.Repositories
         private LiteDatabase EMDatabase { get; set; }
 
         #region Database collections
+        /// <summary>
+        /// Collection of profiles
+        /// </summary>
         private ILiteCollection<EMProfile> entertainmentProfileCollection;
+        /// <summary>
+        /// Collection of entertainment types
+        /// </summary>
         private ILiteCollection<EMType> entertainmentTypeCollection;
+        /// <summary>
+        /// Collection of providers
+        /// </summary>
         private ILiteCollection<EMProvider> entertainmentProviderCollection;
+        /// <summary>
+        /// Collection of mediums
+        /// </summary>
         private ILiteCollection<EMMedium> entertainmentMediumCollection;
+        /// <summary>
+        /// Collections of valid type medium combinations
+        /// </summary>
         private ILiteCollection<EMValidTypeMedium> entertainmentValidTypeMediumCollection;
+        /// <summary>
+        /// Collection of assets
+        /// </summary>
         private ILiteCollection<EMAsset> entertainmentAssetCollection;
+        /// <summary>
+        /// Collection of assets data
+        /// </summary>
+        private ILiteCollection<EMAssetData> entertainmentAssetDataCollection;
         #endregion
 
         public EntertainMeRepository()
@@ -87,6 +109,13 @@ namespace EntertainMe.Infrastructure.Repositories
             entertainmentAssetCollection = EMDatabase.GetCollection<EMAsset>(Collections.EntertainmentAssets);
             mapper.Entity<EMAsset>()
                 .DbRef(x => x.EMProfile, Collections.EntertainmentProfiles);
+            entertainmentAssetDataCollection = EMDatabase.GetCollection<EMAssetData>(Collections.EntertainmentAssetsData);
+            mapper.Entity<EMAssetData>()
+                .DbRef(x => x.EMAsset, Collections.EntertainmentAssets)
+                .DbRef(x => x.EMMedium, Collections.EntertainmentMediums)
+                .DbRef(x => x.EMProvider, Collections.EntertainmentProviders)
+                .DbRef(x => x.EMType, Collections.EntertainmentTypes);
+
             #endregion
 
             #region Initialize default data sets
@@ -346,19 +375,19 @@ namespace EntertainMe.Infrastructure.Repositories
             return mediums;
         }
 
-        public EMAsset SaveEMAsset(EMAsset emAssett)
+        public EMAsset SaveEMAsset(EMAsset emAsset)
         {
-            if (emAssett.Id == 0)
+            if (emAsset.Id == 0)
             {
-                emAssett.Id = entertainmentAssetCollection.Insert(emAssett);
+                emAsset.Id = entertainmentAssetCollection.Insert(emAsset);
             }
             else
             {
-                emAssett.Updated();
-                _ = entertainmentAssetCollection.Update(emAssett);
+                emAsset.Updated();
+                _ = entertainmentAssetCollection.Update(emAsset);
             }
 
-            return emAssett;
+            return emAsset;
         }
 
         public List<EMAsset> GetEMAssets(EMProfile emProfile)
@@ -369,6 +398,35 @@ namespace EntertainMe.Infrastructure.Repositories
                 .ToList();
 
             return assets;
+        }
+
+
+        public EMAssetData SaveEMAssetData(EMAssetData emAssetData)
+        {
+            if (emAssetData.Id == 0)
+            {
+                emAssetData.Id = entertainmentAssetDataCollection.Insert(emAssetData);
+            }
+            else
+            {
+                emAssetData.Updated();
+                _ = entertainmentAssetDataCollection.Update(emAssetData);
+            }
+
+            return emAssetData;
+        }
+
+        public List<EMAssetData> GetEMAssetData(EMAsset emAsset)
+        {
+            var data = entertainmentAssetDataCollection
+                .Include(asset => asset.EMAsset)
+                .Include(asset => asset.EMMedium)
+                .Include(asset => asset.EMProvider)
+                .Include(asset => asset.EMType)
+                .Find(x => x.EMAsset.Id == emAsset.Id)
+                .ToList();
+
+            return data;
         }
 
 

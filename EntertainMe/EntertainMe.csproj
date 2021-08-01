@@ -4,7 +4,8 @@
     <TargetFramework>net5.0</TargetFramework>
     <Authors>Rodney Dixon</Authors>
     <Company>REDWare</Company>
-    <Version>0.0.3</Version>
+    <Version>0.0.4
+    </Version>
     <Description>Tracks a user's entertainment items</Description>
     <Copyright>Copyright (c) 2021</Copyright>
   </PropertyGroup>
