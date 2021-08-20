@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntertainMe", "EntertainMe\EntertainMe.csproj", "{F23D232E-286A-42AC-8B80-2439AF11383D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntertainMe", "EntertainMe\EntertainMe.csproj", "{F23D232E-286A-42AC-8B80-2439AF11383D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntertainMeTests", "Tests\EntertainMeTests.csproj", "{266B04B1-1583-4618-98C5-B442B774EFA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntertainMeTests", "Tests\EntertainMeTests.csproj", "{266B04B1-1583-4618-98C5-B442B774EFA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntertainMeUI", "EntertainMeUI\EntertainMeUI.csproj", "{4CB32728-8DC8-404B-AF44-45E652B3810E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{266B04B1-1583-4618-98C5-B442B774EFA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{266B04B1-1583-4618-98C5-B442B774EFA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{266B04B1-1583-4618-98C5-B442B774EFA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CB32728-8DC8-404B-AF44-45E652B3810E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CB32728-8DC8-404B-AF44-45E652B3810E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CB32728-8DC8-404B-AF44-45E652B3810E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CB32728-8DC8-404B-AF44-45E652B3810E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

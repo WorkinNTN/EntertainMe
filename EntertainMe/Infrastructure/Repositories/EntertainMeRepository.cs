@@ -59,20 +59,56 @@ namespace EntertainMe.Infrastructure.Repositories
         private ILiteCollection<EMAssetData> entertainmentAssetDataCollection;
         #endregion
 
+        /// <summary>
+        /// Initialize EntertainMe with an in-memory repository
+        /// </summary>
         public EntertainMeRepository()
+        {
+            InMemoryInit();
+        }
+
+        /// <summary>
+        /// Initialize EntertainMe repository with an on-disk database and user supplied directory and name
+        /// </summary>
+        /// <param name="path">Directory to house database file</param>
+        /// <param name="file">Database file name</param>
+        public EntertainMeRepository(string path, string file)
+        {
+            OnDiskInit(path, file);
+        }
+
+        /// <summary>
+        /// Initialize EntertainMe either on-disk in default location with default name or in-memory
+        /// </summary>
+        /// <param name="defaultLocation">If true create in default folder with default name, otherwise create an in memory database</param>
+        public EntertainMeRepository(bool defaultLocation)
+        {
+            if (defaultLocation)
+            {
+                OnDiskInit(EMConstants.EntertainMePath, EMConstants.EntertainMeDB);
+            }
+            else
+            {
+                InMemoryInit();
+            }
+        }
+
+        /// <summary>
+        /// Create in-memory database
+        /// </summary>
+        private void InMemoryInit()
         {
             EMDatabase = new LiteDatabase(new MemoryStream());
             ConfigureDatabase(true);
         }
 
         /// <summary>
-        /// Initial EntertainMe repository
+        /// Create on-disk database
         /// </summary>
-        /// <param name="path">Directory to house database file</param>
-        /// <param name="file">Database file name</param>
-        public EntertainMeRepository(string path, string file)
+        /// <param name="path">Directory of database</param>
+        /// <param name="file">Name of database</param>
+        private void OnDiskInit(string path, string file)
         {
-
             if (!path.EndsWith(@"\"))
             {
                 path = path + @"\";
@@ -88,7 +124,6 @@ namespace EntertainMe.Infrastructure.Repositories
             EMDatabase = new LiteDatabase(PathToDb);
 
             ConfigureDatabase(needToInitData);
-
         }
 
         /// <summary>
