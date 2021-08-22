@@ -39,8 +39,8 @@ namespace EntertainMeTests.Infrastructure.Repositories
         { 
             var repo = new EntertainMeRepository(testPath, testDBName);
             Assert.True(File.Exists(testPath + testDBName));
-            var profile = repo.GetEMProfileByName("New User");
-            Assert.AreEqual("New User", profile.UserName);
+            var profile = repo.GetEMProfileByName("New_User");
+            Assert.AreEqual("New_User", profile.UserName);
             repo.Dispose();
             if (File.Exists(testPath + testDBName))
             {
@@ -55,8 +55,9 @@ namespace EntertainMeTests.Infrastructure.Repositories
         [Test]
         public void DefaultDBInitialized()
         {
-            var profile = testRepo.GetEMProfileByName("New User");
-            Assert.AreEqual("New User", profile.UserName);
+            var profile = testRepo.GetEMProfileByName("New_User");
+            Assert.AreEqual("New_User", profile.UserName);
+            Assert.IsTrue(testRepo.ConfigureProfile());
         }
 
         [Test]
@@ -297,7 +298,7 @@ namespace EntertainMeTests.Infrastructure.Repositories
         [Test]
         public void SaveAsset()
         {
-            var profile = testRepo.GetEMProfileByName("New User");
+            var profile = testRepo.GetEMProfileByName("New_User");
             var asset1 = new EMAsset() { EMProfile = profile, Title = "New Asset 1", Description = "This is a unit test asset" };
             var asset2 = new EMAsset() { EMProfile = profile, Title = "New Asset 2", Description = "This is a unit test asset" };
             asset1 = testRepo.SaveEMAsset(asset1);
@@ -314,7 +315,7 @@ namespace EntertainMeTests.Infrastructure.Repositories
         [Test]
         public void SaveAssetData()
         {
-            var profile = testRepo.GetEMProfileByName("New User");
+            var profile = testRepo.GetEMProfileByName("New_User");
             var asset3 = new EMAsset() { EMProfile = profile, Title = "New Asset 3", Description = "This is a unit test asset" };
             asset3 = testRepo.SaveEMAsset(asset3);
 
@@ -338,7 +339,7 @@ namespace EntertainMeTests.Infrastructure.Repositories
         [Test]
         public void GetAssetData()
         {
-            var profile = testRepo.GetEMProfileByName("New User");
+            var profile = testRepo.GetEMProfileByName("New_User");
             var asset4 = new EMAsset() { EMProfile = profile, Title = "New Asset 4", Description = "This is a unit test asset" };
             asset4 = testRepo.SaveEMAsset(asset4);
 

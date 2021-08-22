@@ -10,6 +10,12 @@ namespace EntertainMe.Domain.Abstracts
     interface IEntertainMeRepository
     {
         /// <summary>
+        /// Is the profile in the initial state and needs to be configured
+        /// </summary>
+        /// <returns></returns>
+        bool ConfigureProfile();
+
+        /// <summary>
         /// Save a profile
         /// </summary>
         /// <param name="profile">Profile to save</param>

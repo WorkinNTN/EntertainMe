@@ -159,7 +159,7 @@ namespace EntertainMe.Infrastructure.Repositories
                 #region Default profile
                 _ = entertainmentProfileCollection.Insert(new EMProfile
                 {
-                    UserName = "New User"
+                    UserName = "New_User"
                 });
                 #endregion
 
@@ -241,6 +241,11 @@ namespace EntertainMe.Infrastructure.Repositories
             }
             #endregion
 
+        }
+
+        public bool ConfigureProfile()
+        {
+            return GetEMProfileByName("New_User") != null;
         }
 
         public EMProfile GetEMProfileByName(string username)

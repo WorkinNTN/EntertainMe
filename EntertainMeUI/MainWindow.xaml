@@ -5,8 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EntertainMeUI"
         mc:Ignorable="d"
-        Title="EntertainMe" Height="450" Width="800">
+        Title="EntertainMe" Height="450" Width="800"
+        Closing="OnClosing"
+        Closed="OnClosed">
     <Grid>
-
+        <DockPanel>
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_New" Click="mnuFileNew_Click" />
+                    <MenuItem Header="_Open"  Click="mnuFileOpen_Click" />
+                    <Separator />
+                    <MenuItem Header="_Exit" Click="mnuFileExit_Click"/>
+                </MenuItem>
+            </Menu>
+            <TextBox AcceptsReturn="True" />
+        </DockPanel>
     </Grid>
 </Window>
