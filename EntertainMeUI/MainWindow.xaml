@@ -18,7 +18,6 @@
                     <MenuItem Header="_Exit" Click="mnuFileExit_Click"/>
                 </MenuItem>
             </Menu>
-            <TextBox AcceptsReturn="True" />
         </DockPanel>
     </Grid>
 </Window>
